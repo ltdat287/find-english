@@ -1,6 +1,7 @@
 const User = require('../models/user');
 const request = require('request');
 const config = require('../configs/config');
+const messageService = require('./message.service');
 
 module.exports = {
   getFacebookData: getFacebookData,
@@ -24,6 +25,9 @@ function saveUser(facebookId, messageItem) {
     User.collection.findOneAndUpdate({fb_id : facebookId}, user, {upsert:true}, function(err, user){
       if (err) console.log(err);
       else console.log('user saved');
+console.log(user, user.value._id);
+      // Store message to database
+      messageService.saveMessage(user.value._id, messageItem);
     });
   });
 }

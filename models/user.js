@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 module.exports = mongoose.model('User', {
-  fb_id: { type: String, required: true },
+	fb_id: { type: String, required: true },
 	first_name: String,
 	last_name: String,
 	profile_pic: String,
