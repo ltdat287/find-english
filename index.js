@@ -2,7 +2,7 @@
 
 var express  = require('express');
 var app      = express();
-var port     = process.env.PORT || 5000;
+var port     = process.env.PORT || 3000;
 
 var mongoose    = require('mongoose');
 var database    = require('./configs/database');
@@ -11,7 +11,13 @@ var database    = require('./configs/database');
 var bodyParser     = require('body-parser');
 
 // Mongoose connection
-mongoose.connect(database[process.env.NODE_ENV].url);
+mongoose.connect(database[process.env.NODE_ENV || 'development'].url, function(err){
+	if (err) {
+		console.error(err);
+		process.exit(1);
+	}
+	console.log("connected to " + database[process.env.NODE_ENV || 'development'].url);
+});
 
 // Parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({'extended':'true'}));

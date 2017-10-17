@@ -2,7 +2,11 @@
 const mongoose = require('mongoose');
 
 module.exports = mongoose.model('User', {
-  facebookId: { type: String, required: true },
-  firstName: String,
-  lastName: String
+  fb_id: { type: String, required: true },
+	first_name: String,
+	last_name: String,
+	profile_pic: String,
+	gender: String,
+	locale: String,
+	timezone: String
 });
