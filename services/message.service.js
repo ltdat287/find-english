@@ -4,61 +4,62 @@ const config = require('../configs/config');
 const mongoose = require('mongoose');
 
 module.exports = {
-  // getFacebookData: getFacebookData,
-  saveMessage: saveMessage
+    findAnswerData: findAnswerData,
+    saveMessage: saveMessage
 }
 
 // Get user data Messenger Platform User Profile API and save it on the MongoDB
 function saveMessage(userId, messageItem) {
-  let question = messageItem.message.text
-  let message = {
-    user_id: mongoose.Types.ObjectId(userId),
-    question: question,
-    time_created: Date.now()
-  }
+    let question = messageItem.message.text
+    let message = {
+        user_id: mongoose.Types.ObjectId(userId),
+        question: question,
+        time_created: Date.now()
+    }
 
-  Messenger.create(message, function(err, doc) {
-    if (err) console.log(err);
-    else console.log('message saved');
-  });
+    Messenger.create(message, function (err, doc) {
+        if (err) console.log(err);
+        else console.log('message saved');
 
+        let message_id = doc._id;
+        console.log(message_id);
 
-  // getFacebookData(facebookId, function(err, userData){
-  //   let user = {
-  //     fb_id: facebookId,
-  //     first_name: userData.first_name,
-  //     last_name: userData.last_name,
-  //     profile_pic: userData.profile_pic,
-  //     gender: userData.gender,
-  //     locale: userData.locale,
-  //     timezone: userData.timezone
-  //   };
+        findAnswerData(message_id, question, function (err, answerData) {
+            let message = {
+                "$set": {
+                    "answer": JSON.stringify(answerData)
+                }
+            }
 
-  //   User.collection.findOneAndUpdate({fb_id : facebookId}, user, {upsert:true}, function(err, user){
-  //     if (err) console.log(err);
-  //     else console.log('user saved');
-  //   });
-  // });
+            Messenger.collection.findOneAndUpdate({_id: message_id}, message, {upsert: false}, function (err, mess) {
+                if (err) console.log(err);
+                else console.log('answer updated !');
+            })
+        });
+    });
 }
 
-// Get User data from Messenger Platform User Profile API **NOT GRAPH API**
-// function getFacebookData(facebookId, callback) {
+// Get Answer data from Ludwig Platform API **NOT GRAPH API**
+function findAnswerData(message_id, question, callback) {
 
-//   request({
-//     method: 'GET',
-//     url: 'https://graph.facebook.com/v2.8/' + facebookId,
-//     qs: {
-//       fields: 'first_name,last_name,profile_pic,locale,timezone,gender',
-//       access_token: config.access_token
-//     }
-//   },
+    let reqSearchQuestion = {
+        method: 'GET',
+        url: config.ludwig_uri,
+        headers: {
+            "Authorization": config.ludwig_authorization,
+            "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120 Safari/537.36"
+        },
+        qs: {
+            q: question
+        }
+    };
 
-//   function(err, response, body) {
+    request(reqSearchQuestion, function (err, response, body) {
 
-//     let userData = null
-//     if (err) console.log(err);
-//     else userData = JSON.parse(response.body);
+        let answerData = null
+        if (err) console.log(err);
+        else answerData = JSON.parse(response.body);
 
-//     callback(err, userData);
-//   });
-// }
+        callback(err, answerData);
+    });
+}
