@@ -1,4 +1,5 @@
 const userService = require('../services/user.service');
+const config = require('../configs/config');
 
 module.exports = function(app) {
   // Index route
@@ -7,7 +8,7 @@ module.exports = function(app) {
   });
 
   app.get('/webhook/', function(req, res) {
-    if (req.query['hub.verify_token'] === WEBHOOK_TOKEN) {
+    if (req.query['hub.verify_token'] === config.webhook_token) {
       res.send(req.query['hub.challenge']);
     } else {
       console.error("Failed validation. Make sure the validation tokens match.");
