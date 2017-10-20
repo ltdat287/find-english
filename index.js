@@ -1,6 +1,6 @@
 'use strict'
 
-var fs = required('fs');
+var fs = require('fs');
 var http = require('http');
 var https = require('https');
 var express = require('express');
