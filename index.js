@@ -1,8 +1,14 @@
 'use strict'
 
+var fs = required('fs');
+var http = require('http');
+var https = require('https');
 var express  = require('express');
 var app      = express();
 var port     = process.env.PORT || 3000;
+var key = '';
+var cert = '';
+var chain = '';
 
 var mongoose    = require('mongoose');
 var database    = require('./configs/database');
@@ -32,4 +38,16 @@ app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
 require('./routes/api-ai.js')(app);
 
 // Listen (start app with node index.js)
-app.listen(port);
+var options = {
+	key: fs.readFileSync(key),
+	cert: fs.readFileSync(cert),
+	ca: fs.readFileSync(chain)
+};
+
+if (key) {
+	var server = https.createServer(options, app).listen(port, function(){
+		console.log("Express server listening on port " + port);
+	});
+} else {
+	app.listen(port);
+}
